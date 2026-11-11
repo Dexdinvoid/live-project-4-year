@@ -35,13 +35,13 @@ try {
   );
   await page.waitForFunction(
     () =>
-      window.__godsEyeView?.sceneDirector?._controls &&
+      window.__overwatch?.sceneDirector?._controls &&
       document.getElementById('loading-screen')?.classList.contains('hidden'),
     { timeout: 60000 },
   );
   await page.evaluate(() => {
     window.__qaSceneState = [];
-    window.__godsEyeView.sceneDirector.subscribe((notification) =>
+    window.__overwatch.sceneDirector.subscribe((notification) =>
       window.__qaSceneState.push(notification),
     );
   });
@@ -55,9 +55,9 @@ try {
   check(
     'New creates and selects a persisted empty scene',
     await page.evaluate(() => {
-      const director = window.__godsEyeView.sceneDirector;
+      const director = window.__overwatch.sceneDirector;
       const saved = JSON.parse(
-        localStorage.getItem('godsEyeView.sceneProject.v2'),
+        localStorage.getItem('overwatch.sceneProject.v2'),
       );
       return (
         director._getSelectedScene().shots.length === 0 &&
@@ -74,7 +74,7 @@ try {
   check(
     'Capture stores the actual camera and visual state',
     await page.evaluate(() => {
-      const director = window.__godsEyeView.sceneDirector;
+      const director = window.__overwatch.sceneDirector;
       const shot = director._getSelectedScene().shots[0];
       const current = director.styleManager.getCameraState();
       return (
@@ -100,7 +100,7 @@ try {
       () =>
         !document.querySelector('.scene-shot-label b') &&
         JSON.parse(
-          localStorage.getItem('godsEyeView.sceneProject.v2'),
+          localStorage.getItem('overwatch.sceneProject.v2'),
         ).scenes.some((scene) =>
           scene.shots.some((shot) => shot.title === '<b>QA shot</b>'),
         ),
@@ -114,7 +114,7 @@ try {
   check(
     'Shot selection and Update use the selected shot',
     await page.evaluate(() => {
-      const director = window.__godsEyeView.sceneDirector;
+      const director = window.__overwatch.sceneDirector;
       const scene = director._getSelectedScene();
       const count = scene.shots.length;
       document.getElementById('scene-update-shot-btn').click();
@@ -156,7 +156,7 @@ try {
   fs.writeFileSync(projectFile, JSON.stringify(fixture));
   const input = await page.$('#scene-import-file');
   const beforePreview = await page.evaluate(() =>
-    JSON.stringify(window.__godsEyeView.sceneDirector._project),
+    JSON.stringify(window.__overwatch.sceneDirector._project),
   );
   await input.uploadFile(projectFile);
   await page.waitForSelector('[data-director-apply-import]');
@@ -164,7 +164,7 @@ try {
     'Import preview leaves the current project untouched',
     await page.evaluate(
       (saved) =>
-        JSON.stringify(window.__godsEyeView.sceneDirector._project) === saved,
+        JSON.stringify(window.__overwatch.sceneDirector._project) === saved,
       beforePreview,
     ),
   );
@@ -178,7 +178,7 @@ try {
     'Import replaces the project and clears the file input',
     await page.evaluate(
       () =>
-        window.__godsEyeView.sceneDirector._project.scenes.length === 1 &&
+        window.__overwatch.sceneDirector._project.scenes.length === 1 &&
         document.querySelectorAll('.scene-shot-row').length === 1 &&
         document.getElementById('scene-import-file').value === '',
     ),
@@ -193,7 +193,7 @@ try {
     'LOAD completes the real visual and camera operation',
     await page.evaluate(
       () =>
-        !window.__godsEyeView.sceneDirector.running &&
+        !window.__overwatch.sceneDirector.running &&
         document
           .getElementById('scene-status')
           .textContent.includes('<b>QA shot</b>'),
@@ -202,7 +202,7 @@ try {
   await page.click('#scene-start-btn');
   await page.waitForFunction(
     () =>
-      window.__godsEyeView.sceneDirector.running &&
+      window.__overwatch.sceneDirector.running &&
       document.body.classList.contains('scene-playback-mode'),
   );
   check(
@@ -212,7 +212,7 @@ try {
         document.getElementById('scene-capture-btn').disabled &&
         document.getElementById('scene-start-btn').disabled &&
         !document.getElementById('scene-stop-btn').disabled &&
-        window.__godsEyeView.styleManager.getControlState().recording,
+        window.__overwatch.styleManager.getControlState().recording,
     ),
   );
   // A focused panel owns Escape to collapse one level. Release panel focus
@@ -225,7 +225,7 @@ try {
   await page.keyboard.press('Escape');
   await page.waitForFunction(
     () =>
-      !window.__godsEyeView.sceneDirector.running &&
+      !window.__overwatch.sceneDirector.running &&
       !document.body.classList.contains('scene-playback-mode'),
   );
   check(
@@ -235,7 +235,7 @@ try {
         !document.getElementById('scene-start-btn').disabled &&
         document.getElementById('scene-stop-btn').disabled &&
         !document.getElementById('scene-download-btn').disabled &&
-        !window.__godsEyeView.styleManager.getControlState().recording,
+        !window.__overwatch.styleManager.getControlState().recording,
     ),
   );
   // Escape can also collapse the Scene accordion. Reopen it through its
@@ -260,9 +260,9 @@ try {
     ),
   );
   await page.click('#scene-start-btn');
-  await page.waitForFunction(() => window.__godsEyeView.sceneDirector.running);
+  await page.waitForFunction(() => window.__overwatch.sceneDirector.running);
   await page.$eval('#scene-stop-btn', (button) => button.click());
-  await page.waitForFunction(() => !window.__godsEyeView.sceneDirector.running);
+  await page.waitForFunction(() => !window.__overwatch.sceneDirector.running);
   check(
     'The installed Stop control also completes playback cleanup',
     await page.evaluate(
@@ -283,13 +283,13 @@ try {
     'Invalid import reports failure and preserves the current project',
     await page.evaluate(
       () =>
-        window.__godsEyeView.sceneDirector._project.scenes.length === 1 &&
-        window.__godsEyeView.sceneDirector._getSelectedScene().title ===
+        window.__overwatch.sceneDirector._project.scenes.length === 1 &&
+        window.__overwatch.sceneDirector._getSelectedScene().title ===
           'QA Scene',
     ),
   );
   const savedBefore = await page.evaluate(() =>
-    localStorage.getItem('godsEyeView.sceneProject.v2'),
+    localStorage.getItem('overwatch.sceneProject.v2'),
   );
   const futureFile = path.join(shots, 'future.json');
   fs.writeFileSync(futureFile, JSON.stringify({ version: 99, scenes: [] }));
@@ -303,8 +303,8 @@ try {
     'Unsupported versions leave authored state and saved bytes unchanged',
     await page.evaluate(
       (saved) =>
-        localStorage.getItem('godsEyeView.sceneProject.v2') === saved &&
-        window.__godsEyeView.sceneDirector._getSelectedScene().title ===
+        localStorage.getItem('overwatch.sceneProject.v2') === saved &&
+        window.__overwatch.sceneDirector._getSelectedScene().title ===
           'QA Scene',
       savedBefore,
     ),
@@ -322,7 +322,7 @@ try {
   check(
     'Invalid camera field identifies its path without replacing the project',
     await page.evaluate(
-      (saved) => localStorage.getItem('godsEyeView.sceneProject.v2') === saved,
+      (saved) => localStorage.getItem('overwatch.sceneProject.v2') === saved,
       savedBefore,
     ),
   );
@@ -346,14 +346,14 @@ try {
     'Delete shot leaves the empty-state presentation',
     await page.evaluate(
       () =>
-        window.__godsEyeView.sceneDirector._getSelectedScene().shots.length ===
+        window.__overwatch.sceneDirector._getSelectedScene().shots.length ===
         0,
     ),
   );
   await page.click('#scene-delete-btn');
   await page.waitForFunction(
     () =>
-      !window.__godsEyeView.sceneDirector._project.scenes.some(
+      !window.__overwatch.sceneDirector._project.scenes.some(
         (item) => item.title === 'QA Scene',
       ),
   );
@@ -361,7 +361,7 @@ try {
     'Deleting the final scene restores the built-in recipes',
     await page.evaluate(
       () =>
-        window.__godsEyeView.sceneDirector._project.scenes.length > 0 &&
+        window.__overwatch.sceneDirector._project.scenes.length > 0 &&
         document.querySelectorAll('#scene-select option').length > 0,
     ),
   );
@@ -391,7 +391,7 @@ try {
     }),
   );
   const teardown = await page.evaluate(async () => {
-    const director = window.__godsEyeView.sceneDirector;
+    const director = window.__overwatch.sceneDirector;
     const controls = director._controls;
     const previousStatus = document.getElementById('scene-status').textContent;
     const project = director._project;

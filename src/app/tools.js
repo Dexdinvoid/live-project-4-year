@@ -153,7 +153,7 @@ export function createApplicationTools({
   // loop burning behind a hidden tab. (perf wave 2 fix)
   syncVisibilitySuspension();
 
-  window.__godsEyeView = {
+  window.__overwatch = {
     viewer,
     styleManager,
     tileset,
@@ -167,9 +167,9 @@ export function createApplicationTools({
     surfaceServices: operations.surface,
     requestRender: governorRequestRender,
   };
-  const debug = window.__godsEyeView;
+  const debug = window.__overwatch;
   defer(() => {
-    if (window.__godsEyeView === debug) delete window.__godsEyeView;
+    if (window.__overwatch === debug) delete window.__overwatch;
   });
   const voiceCommands = initGevVoiceCommands({
     ...voice,

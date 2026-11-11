@@ -142,7 +142,7 @@ function installStubs() {
 
 /** Colour of every shown fleet billboard whose id is one of `ids`. */
 function billboardColors(ids) {
-  const { viewer } = window.__godsEyeView;
+  const { viewer } = window.__overwatch;
   const found = {};
   const seen = new Set();
   const visit = (primitive) => {
@@ -176,7 +176,7 @@ const isAmber = (c) =>
 async function shoot(page, name) {
   await page
     .waitForFunction(
-      () => window.__godsEyeView.viewer.scene.globe.tilesLoaded,
+      () => window.__overwatch.viewer.scene.globe.tilesLoaded,
       { timeout: 30000 },
     )
     .catch(() => {});
@@ -250,14 +250,14 @@ async function main() {
       timeout: TIMEOUT_MS,
     });
     await page.waitForFunction(
-      () => window.__godsEyeView?.viewer && window.__godsEyeView?.dataManager,
+      () => window.__overwatch?.viewer && window.__overwatch?.dataManager,
       { timeout: TIMEOUT_MS },
     );
     await sleep(5000);
     await page.keyboard.press('Escape');
     await page.evaluate(
       (lo, la) => {
-        const gev = window.__godsEyeView;
+        const gev = window.__overwatch;
         const d2r = Math.PI / 180;
         try {
           gev.viewer.camera.cancelFlight();
@@ -283,7 +283,7 @@ async function main() {
     // ── (i) TINT ──────────────────────────────────────────────────────────
     console.log('(i) TINT — emergency codes through the real layers...');
     await page.evaluate(async () => {
-      const dm = window.__godsEyeView.dataManager;
+      const dm = window.__overwatch.dataManager;
       await dm.setEnabled('flights', true, { origin: 'user' });
       await dm.setEnabled('military', true, { origin: 'user' });
     });
@@ -328,7 +328,7 @@ async function main() {
     // Existing untracked billboards and models must repaint in both directions.
     await page.evaluate(async () => {
       window.__squawkQaPhase = 'cleared';
-      await window.__godsEyeView.dataManager.refreshLayer('military');
+      await window.__overwatch.dataManager.refreshLayer('military');
     });
     record(
       'POLL: existing military billboard clears to amber',
@@ -336,7 +336,7 @@ async function main() {
     );
     await page.evaluate(async () => {
       window.__squawkQaPhase = 'emergency';
-      await window.__godsEyeView.dataManager.refreshLayer('military');
+      await window.__overwatch.dataManager.refreshLayer('military');
     });
     record(
       'POLL: existing military billboard turns red again',
@@ -356,7 +356,7 @@ async function main() {
           else if (item.get) visit(item);
         }
       };
-      visit(window.__godsEyeView.viewer.scene.primitives);
+      visit(window.__overwatch.viewer.scene.primitives);
       return found;
     };
     await page.waitForFunction(
@@ -373,7 +373,7 @@ async function main() {
       window.__squawkQaFixtures.civil[0][14] = '2000';
       window.__squawkQaFixtures.civil[1][14] = '7600';
       window.__squawkQaPhase = 'cleared';
-      const dm = window.__godsEyeView.dataManager;
+      const dm = window.__overwatch.dataManager;
       await dm.refreshLayer('flights');
       await dm.refreshLayer('military');
     });
@@ -394,7 +394,7 @@ async function main() {
       window.__squawkQaFixtures.civil[1][14] = '2000';
       window.__squawkQaFixtures.mil[0].squawk = '7700';
       window.__squawkQaPhase = 'emergency';
-      const dm = window.__godsEyeView.dataManager;
+      const dm = window.__overwatch.dataManager;
       await dm.refreshLayer('flights');
       await dm.refreshLayer('military');
     });
@@ -402,7 +402,7 @@ async function main() {
     console.log('\n(ii) HUD — track the emergency and enter Cockpit...');
     const tracked = await page.evaluate(() =>
       Boolean(
-        window.__godsEyeView.dataManager.layers
+        window.__overwatch.dataManager.layers
           .get('military')
           .module.trackById('ae7700', { origin: 'user' }),
       ),
@@ -414,7 +414,7 @@ async function main() {
     );
     // Cockpit entry is gated on the Contacts (flights) context mode.
     await page.evaluate(() =>
-      window.__godsEyeView.styleManager._contextControls._selectContextMode(
+      window.__overwatch.styleManager._contextControls._selectContextMode(
         'flights',
       ),
     );
@@ -464,7 +464,7 @@ async function main() {
     );
     const trackedBroadcast = await page.evaluate(
       () =>
-        window.__godsEyeView.dataManager.layers
+        window.__overwatch.dataManager.layers
           .get('military')
           .module.getTrackedInfo().emergencyBroadcast,
     );
@@ -479,7 +479,7 @@ async function main() {
     console.log('\n(iii) CLEAR — the next poll drops the code...');
     await page.evaluate(async () => {
       window.__squawkQaPhase = 'cleared';
-      await window.__godsEyeView.dataManager.refreshLayer('military');
+      await window.__overwatch.dataManager.refreshLayer('military');
     });
     const cleared = await page
       .waitForFunction(
@@ -507,7 +507,7 @@ async function main() {
     console.log('\n(iv) RELEASE — the code returns, then tracking stops...');
     await page.evaluate(async () => {
       window.__squawkQaPhase = 'emergency';
-      const dm = window.__godsEyeView.dataManager;
+      const dm = window.__overwatch.dataManager;
       await dm.refreshLayer('military');
       dm.layers.get('military').module.stopTracking({ origin: 'user' });
     });

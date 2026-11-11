@@ -6,7 +6,7 @@ import { cameraPoseKey } from './pointerContext.js';
 
 /** The live viewer's camera pose identity (Cesium-free read). */
 export function readViewerCameraKey() {
-  return cameraPoseKey(globalThis.window?.__godsEyeView?.viewer);
+  return cameraPoseKey(globalThis.window?.__overwatch?.viewer);
 }
 // Viewport-screenshot size guards (M13). The old code clamped WIDTH only, so a
 // tall portrait window produced an oversized capture whose dc.send could throw.
@@ -18,7 +18,7 @@ export const VIEWPORT_MAX_PIXELS = 1200 * 900;
 export const VIEWPORT_MAX_ENCODED_BYTES = 200 * 1024;
 
 export async function captureViewportImage() {
-  const viewer = window.__godsEyeView?.viewer;
+  const viewer = window.__overwatch?.viewer;
   const source =
     viewer?.scene?.canvas ||
     document.querySelector('#cesiumContainer .cesium-widget canvas');
@@ -129,7 +129,7 @@ export function pointerCropRect({
  *   the crop's normalized bounds in the full canvas, or null.
  */
 export async function capturePointerCrop(screenPx) {
-  const viewer = window.__godsEyeView?.viewer;
+  const viewer = window.__overwatch?.viewer;
   const source = viewer?.scene?.canvas;
   if (!source?.width || !source?.height || !screenPx) return null;
   const fresh = await renderFreshPointerFrame(viewer);
@@ -348,7 +348,7 @@ export class RealtimeViewport {
     if (hasStructuredViewIdentity(result)) return false;
     return this.sendRetainedImage(
       () => this.capture(),
-      "Current God's Eye View viewport screenshot. Read any clearly visible street, building, and place labels in the image and combine them with the structured nearbyPlaces, streetLabels, and scene context. Do not invent labels that are not legible.",
+      "Current Overwatch viewport screenshot. Read any clearly visible street, building, and place labels in the image and combine them with the structured nearbyPlaces, streetLabels, and scene context. Do not invent labels that are not legible.",
       'client.viewport_context',
       { kind: 'viewport' },
     );

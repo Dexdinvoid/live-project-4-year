@@ -1,6 +1,6 @@
-# Contributing to God's Eye View
+# Contributing to Overwatch
 
-Thanks for being here. God's Eye View is an open foundation for live spatial intelligence in the browser, and it gets better when more people run it, break it, and extend it.
+Thanks for being here. Overwatch is an open foundation for live spatial intelligence in the browser, and it gets better when more people run it, break it, and extend it.
 
 ## Getting set up
 
@@ -156,7 +156,7 @@ ownership and adoption process.
 
 ## Maintainers
 
-God's Eye View is maintained by [Bilawal Sidhu](https://github.com/bilawalsidhu)
+Overwatch is maintained by [Bilawal Sidhu](https://github.com/bilawalsidhu)
 and [Sameh Khamis](https://github.com/samehkhamis) at
 [Halfpixel](https://halfpixel.ai). Either maintainer can review and merge
 contributions.

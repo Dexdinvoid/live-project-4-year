@@ -55,7 +55,7 @@ const result = {
 let page;
 const readSession = () =>
   page.evaluate(async () => {
-    const voice = window.__godsEyeView.voiceCommands;
+    const voice = window.__overwatch.voiceCommands;
     const stats = voice.pc ? [...(await voice.pc.getStats()).values()] : [];
     const input = stats.find(
       (entry) => entry.type === 'outbound-rtp' && entry.kind === 'audio',
@@ -151,7 +151,7 @@ try {
   await page.goto(url.href, { waitUntil: 'domcontentloaded', timeout: 30_000 });
   await page.waitForFunction(
     () =>
-      window.__godsEyeView?.voiceCommands &&
+      window.__overwatch?.voiceCommands &&
       document.getElementById('loading-screen')?.classList.contains('hidden'),
     { timeout: 45_000 },
   );
@@ -163,12 +163,12 @@ try {
       getComputedStyle(document.getElementById('key-setup')).opacity === '1',
   );
   const selected = await page.evaluate(
-    () => localStorage.getItem('godsEyeView.voice.cloudAuth') || 'api-key',
+    () => localStorage.getItem('overwatch.voice.cloudAuth') || 'api-key',
   );
   if (selected !== auth) {
     await page.click('[data-cloud-voice-auth-toggle]');
     await page.waitForFunction(
-      (mode) => localStorage.getItem('godsEyeView.voice.cloudAuth') === mode,
+      (mode) => localStorage.getItem('overwatch.voice.cloudAuth') === mode,
       { timeout: 125_000 },
       auth,
     );
@@ -177,13 +177,13 @@ try {
   await page.click('#gev-voice-button');
   await page.waitForFunction(
     () =>
-      window.__godsEyeView.voiceCommands.dc?.readyState === 'open' ||
-      window.__godsEyeView.voiceCommands.status === 'error',
+      window.__overwatch.voiceCommands.dc?.readyState === 'open' ||
+      window.__overwatch.voiceCommands.status === 'error',
     { timeout: 35_000 },
   );
   assert.equal(
     await page.evaluate(
-      () => window.__godsEyeView.voiceCommands.dc?.readyState,
+      () => window.__overwatch.voiceCommands.dc?.readyState,
     ),
     'open',
     'Realtime channel must open',
@@ -228,7 +228,7 @@ try {
   await page.screenshot({ path: path.join(output, `${auth}-settings.png`) });
   await page.click('[data-key-setup-close]');
   result.stopped = await page.evaluate(() => {
-    const voice = window.__godsEyeView.voiceCommands;
+    const voice = window.__overwatch.voiceCommands;
     const pc = voice.pc;
     const tracks = voice.stream?.getTracks() || [];
     voice.session.stop();
@@ -241,13 +241,13 @@ try {
   await page.click('#gev-voice-button');
   await page.waitForFunction(
     () =>
-      window.__godsEyeView.voiceCommands.dc?.readyState === 'open' ||
-      window.__godsEyeView.voiceCommands.status === 'error',
+      window.__overwatch.voiceCommands.dc?.readyState === 'open' ||
+      window.__overwatch.voiceCommands.status === 'error',
     { timeout: 35_000 },
   );
   assert.equal(
     await page.evaluate(
-      () => window.__godsEyeView.voiceCommands.dc?.readyState,
+      () => window.__overwatch.voiceCommands.dc?.readyState,
     ),
     'open',
     'Reconnect must work',
@@ -279,7 +279,7 @@ try {
   }
 } finally {
   await page
-    ?.evaluate(() => window.__godsEyeView?.voiceCommands?.session?.stop())
+    ?.evaluate(() => window.__overwatch?.voiceCommands?.session?.stop())
     .catch(() => {});
   await browser.close();
   fs.writeFileSync(

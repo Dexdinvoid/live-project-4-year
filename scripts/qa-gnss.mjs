@@ -83,14 +83,14 @@ async function boot(page, { lon, lat, height }) {
     timeout: TIMEOUT_MS,
   });
   await page.waitForFunction(
-    () => window.__godsEyeView?.viewer && window.__godsEyeView?.dataManager,
+    () => window.__overwatch?.viewer && window.__overwatch?.dataManager,
     { timeout: TIMEOUT_MS },
   );
   await sleep(5000);
   await page.keyboard.press('Escape');
   await page.evaluate(
     (lo, la, h) => {
-      const gev = window.__godsEyeView;
+      const gev = window.__overwatch;
       const d2r = Math.PI / 180;
       // The app's intro flyTo animation clobbers a setView issued mid-flight.
       try {
@@ -118,7 +118,7 @@ async function boot(page, { lon, lat, height }) {
 async function enableAndSettle(page, { refresh = false } = {}) {
   return page.evaluate(
     async (id, again) => {
-      const dm = window.__godsEyeView.dataManager;
+      const dm = window.__overwatch.dataManager;
       const layer = dm.layers.get(id).module;
       if (again) await dm.refreshLayer(id);
       else await dm.setEnabled(id, true);
@@ -129,7 +129,7 @@ async function enableAndSettle(page, { refresh = false } = {}) {
       const rowName =
         document.querySelector(`[data-layer-id="${id}"] .data-name`)
           ?.textContent ?? '';
-      const all = window.__godsEyeView.viewer.scene.groundPrimitives;
+      const all = window.__overwatch.viewer.scene.groundPrimitives;
       const ds = Array.from({ length: all.length }, (_, i) => all.get(i)).find(
         (item) => item.id === id,
       );
@@ -176,7 +176,7 @@ function paintedOverlayPixels() {
 async function shoot(page, name) {
   await page
     .waitForFunction(
-      () => window.__godsEyeView.viewer.scene.globe.tilesLoaded,
+      () => window.__overwatch.viewer.scene.globe.tilesLoaded,
       { timeout: TIMEOUT_MS },
     )
     .catch(() => {});
@@ -186,7 +186,7 @@ async function shoot(page, name) {
 
 /** Bounding-sphere state of every GNSS cell: DONE = 0, PENDING = 1, FAILED = 2. */
 function cellStates(id) {
-  const { viewer } = window.__godsEyeView;
+  const { viewer } = window.__overwatch;
   const all = viewer.scene.groundPrimitives;
   const ds = Array.from({ length: all.length }, (_, i) => all.get(i)).find(
     (item) => item.id === id,
@@ -302,7 +302,7 @@ function toggleState(id) {
   const button = document.querySelector(
     `[data-layer-id="${id}"] .data-toggle-btn`,
   );
-  const layer = window.__godsEyeView.dataManager.layers.get(id);
+  const layer = window.__overwatch.dataManager.layers.get(id);
   return {
     focused: document.activeElement === button,
     label: button?.getAttribute('aria-label') ?? '',
@@ -320,7 +320,7 @@ async function pressToggle(page, key, wantEnabled) {
   await page
     .waitForFunction(
       (id, want) => {
-        const layer = window.__godsEyeView.dataManager.layers.get(id);
+        const layer = window.__overwatch.dataManager.layers.get(id);
         return (
           Boolean(layer?.enabled) === want &&
           (!want || layer.module.getStats().count > 0)
@@ -542,7 +542,7 @@ async function main() {
           );
         return original(input, init);
       };
-      const { viewer, dataManager } = window.__godsEyeView;
+      const { viewer, dataManager } = window.__overwatch;
       viewer.camera.cancelFlight();
       viewer.camera.setView({
         destination: viewer.scene.globe.ellipsoid.cartographicToCartesian({
@@ -557,7 +557,7 @@ async function main() {
     });
     await page.waitForFunction(
       () => {
-        const v = window.__godsEyeView.viewer,
+        const v = window.__overwatch.viewer,
           p = v.scene.pick({
             x: v.scene.canvas.clientWidth / 2,
             y: v.scene.canvas.clientHeight / 2,
@@ -569,7 +569,7 @@ async function main() {
       { timeout: TIMEOUT_MS, polling: 250 },
     );
     const pickProbe = await page.evaluate(() => {
-      const v = window.__godsEyeView.viewer,
+      const v = window.__overwatch.viewer,
         c = v.scene.canvas;
       const centre = { x: c.clientWidth / 2, y: c.clientHeight / 2 };
       const empty = { x: centre.x + 300, y: centre.y };
@@ -622,14 +622,14 @@ async function main() {
       await page.evaluate(
         (height) =>
           Math.abs(
-            window.__godsEyeView.viewer.camera.positionCartographic.height -
+            window.__overwatch.viewer.camera.positionCartographic.height -
               height,
           ) < 200,
         pickProbe.height,
       ),
     );
     await page.evaluate(async () => {
-      await window.__godsEyeView.dataManager.setEnabled(
+      await window.__overwatch.dataManager.setEnabled(
         'fire-perimeters',
         false,
       );
@@ -639,7 +639,7 @@ async function main() {
       () => window.__gnssQaRequests.length,
     );
     await page.evaluate(() => {
-      const { viewer } = window.__godsEyeView;
+      const { viewer } = window.__overwatch;
       viewer.camera.setView({
         destination: viewer.scene.globe.ellipsoid.cartographicToCartesian({
           longitude: (139.7 * Math.PI) / 180,
@@ -667,8 +667,8 @@ async function main() {
     const moved = await page.evaluate(
       (id) => ({
         requests: window.__gnssQaRequests.length,
-        enabled: window.__godsEyeView.dataManager.isEnabled(id),
-        coverage: window.__godsEyeView.dataManager.layers
+        enabled: window.__overwatch.dataManager.isEnabled(id),
+        coverage: window.__overwatch.dataManager.layers
           .get(id)
           .module.getStats().coverage,
         info: document.querySelector(
@@ -688,7 +688,7 @@ async function main() {
     );
     await shoot(page, 'camera-refresh');
     await page.evaluate(() => {
-      const { viewer } = window.__godsEyeView;
+      const { viewer } = window.__overwatch;
       viewer.camera.setView({
         destination: viewer.scene.globe.ellipsoid.cartographicToCartesian({
           longitude: (12.4 * Math.PI) / 180,
@@ -712,7 +712,7 @@ async function main() {
       { timeout: 15000 },
     );
     const world = await page.evaluate((id) => {
-      const { viewer, dataManager } = window.__godsEyeView;
+      const { viewer, dataManager } = window.__overwatch;
       const bounds = viewer.camera.computeViewRectangle(
         viewer.scene.globe.ellipsoid,
       );
@@ -735,7 +735,7 @@ async function main() {
     );
     await shoot(page, 'globe-regional');
     await page.evaluate(() => {
-      const { viewer } = window.__godsEyeView;
+      const { viewer } = window.__overwatch;
       viewer.camera.setView({
         destination: viewer.scene.globe.ellipsoid.cartographicToCartesian({
           longitude: (18.6 * Math.PI) / 180,
@@ -777,8 +777,8 @@ async function main() {
     // ── (iv) DISABLE ──────────────────────────────────────────────────────
     console.log('\n(iv) DISABLE...');
     const shown = await page.evaluate(async (id) => {
-      await window.__godsEyeView.dataManager.setEnabled(id, false);
-      const all = window.__godsEyeView.viewer.scene.groundPrimitives;
+      await window.__overwatch.dataManager.setEnabled(id, false);
+      const all = window.__overwatch.viewer.scene.groundPrimitives;
       return Array.from({ length: all.length }, (_, i) => all.get(i)).find(
         (item) => item.id === id,
       )?.show;
@@ -871,14 +871,14 @@ async function main() {
     await showLayerRow(retry);
     await retry.evaluate((id) => {
       window.__gnssQaFailedStarts = 0;
-      window.__godsEyeView.dataManager.subscribe((change) => {
+      window.__overwatch.dataManager.subscribe((change) => {
         if (change.layerId === id && change.type === 'visibility-failed')
           window.__gnssQaFailedStarts++;
       });
     }, LAYER_ID);
     const initial = await enableAndSettle(retry);
     const limited = await retry.evaluate((id) => {
-      const dm = window.__godsEyeView.dataManager;
+      const dm = window.__overwatch.dataManager;
       const row = document.querySelector(`[data-layer-id="${id}"]`);
       return {
         enabled: dm.isEnabled(id),
@@ -902,7 +902,7 @@ async function main() {
     });
     await retry.waitForFunction(
       (id) => {
-        const layer = window.__godsEyeView.dataManager.layers.get(id);
+        const layer = window.__overwatch.dataManager.layers.get(id);
         return (
           layer.enabled &&
           layer.module.getStats().error === null &&
@@ -915,7 +915,7 @@ async function main() {
     const recovered = await retry.evaluate(
       (id) => ({
         requests: window.__gnssQaRequests.length,
-        enabled: window.__godsEyeView.dataManager.isEnabled(id),
+        enabled: window.__overwatch.dataManager.isEnabled(id),
         label: document.querySelector(
           `[data-layer-id="${id}"] .data-toggle-btn`,
         ).textContent,

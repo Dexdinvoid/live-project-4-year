@@ -91,7 +91,7 @@ try {
     { timeout: 60000 },
   );
   await page.evaluate(async () => {
-    const { viewer, dataManager } = window.__godsEyeView;
+    const { viewer, dataManager } = window.__overwatch;
     const C = window.__CESIUM__;
     for (const id of dataManager.layers.keys())
       await dataManager.setEnabled(id, false);
@@ -165,7 +165,7 @@ try {
     };
   });
   const equivalent = await page.evaluate(async (text) => {
-    const { viewer } = window.__godsEyeView;
+    const { viewer } = window.__overwatch;
     const control = await window.__qaUnsharedKml(text);
     const outcomes = await window.__gevGeoImport.importFiles([
       new File([text], 'style-equivalence.kml'),
@@ -196,12 +196,12 @@ try {
       window.__qaStyleSnapshot(source),
     );
     window.__qaControl = source;
-    await window.__godsEyeView.viewer.dataSources.add(source);
+    await window.__overwatch.viewer.dataSources.add(source);
   }, large);
   const measure = async () =>
     page.evaluate(async () => {
       const C = window.__CESIUM__,
-        { viewer } = window.__godsEyeView;
+        { viewer } = window.__overwatch;
       const scene = viewer.scene;
       viewer.camera.cancelFlight();
       viewer.camera.setView({
@@ -246,12 +246,12 @@ try {
     });
   console.log('UNSHARED CONTROL', JSON.stringify(await measure()));
   await page.evaluate(() =>
-    window.__godsEyeView.viewer.dataSources.remove(window.__qaControl, true),
+    window.__overwatch.viewer.dataSources.remove(window.__qaControl, true),
   );
 
   const loadPicked = async (filename, expected) => {
     const before = await page.evaluate(
-      () => window.__godsEyeView.viewer.dataSources.length,
+      () => window.__overwatch.viewer.dataSources.length,
     );
     const priorIds = await page.evaluate(() =>
       window.__gevGeoImport.list().map((f) => f.id),
@@ -276,7 +276,7 @@ try {
     const state = await page.evaluate(() => ({
       files: window.__gevGeoImport.list(),
       hint: document.getElementById('geo-import-hint').textContent,
-      sources: window.__godsEyeView.viewer.dataSources.length,
+      sources: window.__overwatch.viewer.dataSources.length,
     }));
     const item = state.files.find((f) => !priorIds.includes(f.id));
     check(
@@ -297,7 +297,7 @@ try {
   const item = await loadPicked(file, 5000);
   if (item) {
     const same = await page.evaluate(() => {
-      const viewer = window.__godsEyeView.viewer;
+      const viewer = window.__overwatch.viewer;
       const source = viewer.dataSources.get(viewer.dataSources.length - 1);
       return (
         JSON.stringify(window.__qaStyleSnapshot(source)) ===
@@ -310,7 +310,7 @@ try {
   }
   if (supplied) {
     const clockBefore = await page.evaluate(() => {
-      const v = window.__godsEyeView.viewer,
+      const v = window.__overwatch.viewer,
         C = window.__CESIUM__;
       return [
         C.JulianDate.toIso8601(v.clock.startTime),
@@ -321,7 +321,7 @@ try {
     });
     const suppliedItem = await loadPicked(supplied, null);
     const clockAfter = await page.evaluate(() => {
-      const v = window.__godsEyeView.viewer,
+      const v = window.__overwatch.viewer,
         C = window.__CESIUM__;
       return [
         C.JulianDate.toIso8601(v.clock.startTime),
@@ -336,7 +336,7 @@ try {
     );
     if (suppliedItem && process.argv.includes('--expect-local-pins')) {
       const markers = await page.evaluate(() => {
-        const { viewer } = window.__godsEyeView,
+        const { viewer } = window.__overwatch,
           C = window.__CESIUM__;
         const source = viewer.dataSources.get(viewer.dataSources.length - 1);
         const points = (

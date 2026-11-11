@@ -1,4 +1,4 @@
-# Translating God's Eye View
+# Translating Overwatch
 
 Shipped languages: **English** (source and fallback), **Spanish** (`es`) and **Russian** (`ru`).
 

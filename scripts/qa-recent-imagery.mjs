@@ -129,7 +129,7 @@ function installPageHelpers() {
       return out;
     },
     hosts() {
-      const gev = window.__godsEyeView;
+      const gev = window.__overwatch;
       const globe = this.gibs(gev.viewer.imageryLayers);
       const tileset = this.gibs(gev.tileset?.imageryLayers);
       return {
@@ -153,7 +153,7 @@ function installPageHelpers() {
         : false;
     },
     activeStack: () =>
-      window.__godsEyeView.mapStackController?.getActiveId?.() ?? null,
+      window.__overwatch.mapStackController?.getActiveId?.() ?? null,
   };
 }
 
@@ -161,7 +161,7 @@ const state = () =>
   page.evaluate(() => {
     const qa = window.__riQa;
     const snapshot = qa.snap();
-    const gev = window.__godsEyeView;
+    const gev = window.__overwatch;
     const split = document.getElementById('recent-imagery-split-line');
     const text = (id) => document.getElementById(id)?.textContent || '';
     const hosts = qa.hosts();
@@ -213,7 +213,7 @@ const hostsDetail = (s) =>
 /** Put the camera straight down over a point at a height, no flight. */
 const setView = (view) =>
   page.evaluate((target) => {
-    const viewer = window.__godsEyeView.viewer;
+    const viewer = window.__overwatch.viewer;
     viewer.camera.cancelFlight?.();
     viewer.scene.tweens?.removeAll?.();
     viewer.camera.setView({
@@ -230,7 +230,7 @@ const setView = (view) =>
 /** Ground width of the camera's view rectangle, in km (0 without one). */
 const viewWidthKm = () =>
   page.evaluate(() => {
-    const rect = window.__godsEyeView.viewer.camera.computeViewRectangle?.();
+    const rect = window.__overwatch.viewer.camera.computeViewRectangle?.();
     if (!rect) return 0;
     const lat = (rect.south + rect.north) / 2;
     return Math.abs(rect.east - rect.west) * 6371 * Math.cos(lat);
@@ -278,7 +278,7 @@ async function probe() {
 
 const tilesSettled = () =>
   until(() => {
-    const gev = window.__godsEyeView;
+    const gev = window.__overwatch;
     if (gev.viewer.scene.globe.show) return gev.viewer.scene.globe.tilesLoaded;
     return !gev.tileset || gev.tileset.tilesLoaded;
   });
@@ -369,7 +369,7 @@ try {
   const booted = await until(
     () =>
       window.__gevRecentImagery &&
-      window.__godsEyeView &&
+      window.__overwatch &&
       document.getElementById('loading-screen')?.classList.contains('hidden'),
     null,
     90_000,
@@ -400,7 +400,7 @@ try {
   check(
     'the layer enables from its toggle',
     await until(() =>
-      window.__godsEyeView.dataManager.isEnabled('recent-imagery'),
+      window.__overwatch.dataManager.isEnabled('recent-imagery'),
     ),
   );
   check(
@@ -587,7 +587,7 @@ try {
       break;
     }
     await page.evaluate(() =>
-      window.__godsEyeView.viewer.scene.requestRender(),
+      window.__overwatch.viewer.scene.requestRender(),
     );
     await wait(1000);
   }
@@ -1041,7 +1041,7 @@ try {
   await panelShot('05-refused-panel');
   // ZOOM IN: straight down to the height whose view is 400 km wide.
   const fitHeight = await page.evaluate(() => {
-    const viewer = window.__godsEyeView.viewer;
+    const viewer = window.__overwatch.viewer;
     const canvas = viewer.scene.canvas;
     const halfWidth =
       Math.tan(viewer.camera.frustum.fovy / 2) *
@@ -1052,14 +1052,14 @@ try {
   const zoomed = await until(
     (target) =>
       Math.abs(
-        window.__godsEyeView.viewer.camera.positionCartographic.height - target,
+        window.__overwatch.viewer.camera.positionCartographic.height - target,
       ) <=
       target * 0.01,
     fitHeight,
     ZOOM_TIMEOUT_MS,
   );
   const zoomedHeight = await page.evaluate(
-    () => window.__godsEyeView.viewer.camera.positionCartographic.height,
+    () => window.__overwatch.viewer.camera.positionCartographic.height,
   );
   check(
     `ZOOM IN reaches target within ${ZOOM_TIMEOUT_MS / 1_000} s`,
@@ -1133,14 +1133,14 @@ try {
   });
   check('a 10 km box previews the START HERE day again', redraped);
   const stacks = await page.evaluate(() =>
-    window.__godsEyeView.mapStackController
+    window.__overwatch.mapStackController
       .getStacks()
       .filter((s) => s.available)
       .map((s) => s.id),
   );
   const setStack = (id) =>
     page.evaluate(
-      (stack) => window.__godsEyeView.mapStackController.setStack(stack),
+      (stack) => window.__overwatch.mapStackController.setStack(stack),
       id,
     );
   /** Wait for the one GIBS drape to sit on the given host only. */
@@ -1450,7 +1450,7 @@ try {
   check(
     'the layer disables from its toggle',
     await until(
-      () => !window.__godsEyeView.dataManager.isEnabled('recent-imagery'),
+      () => !window.__overwatch.dataManager.isEnabled('recent-imagery'),
     ),
   );
   const cleared = await until(() => {

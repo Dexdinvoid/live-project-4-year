@@ -87,7 +87,7 @@ import cancels and settles pending playback before replacing the project. If
 multiple files are read concurrently, only the newest request can replace it.
 Disposal prevents a pending import from publishing.
 
-The browser storage key remains `godsEyeView.sceneProject.v2` for compatibility;
+The browser storage key remains `overwatch.sceneProject.v2` for compatibility;
 that key's suffix is not the document version. An unreadable saved project stays
 in storage. The app supplies temporary defaults and a visible warning, but blocks
 saving over the original bytes until a valid file is explicitly imported. Export
